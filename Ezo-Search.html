@@ -1,0 +1,246 @@
+<html><head>
+    <base href="https://www.globalspendinginsights.com/">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Online Spending Insights</title>
+
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f8ff;
+        color: #333;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    h1, h2 {
+        color: #2c3e50;
+        text-align: center;
+    }
+    .p2 {
+        text-align: center;
+    }
+    #country-form {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    #country-input {
+        padding: 10px;
+        font-size: 16px;
+        width: 250px;
+        border: 1px solid #bdc3c7;
+        border-radius: 5px 0 0 5px;
+    }
+    #submit-btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 0 5px 5px 0;
+        transition: background-color 0.3s;
+    }
+    #submit-btn:hover {
+        background-color: #2980b9;
+    }
+    #result, #category-analysis {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    #loading {
+        text-align: center;
+        display: none;
+    }
+    #world-map {
+        width: 100%;
+        height: 400px;
+        background-color: #a5d5f7;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    #chart-container {
+        width: 100%;
+        height: 400px;
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Global Online Spending Insights</h1>
+        <p class="P2">Analys The Total Money People Spent Online Every Single Month <br>
+          Just Input Any Country In The Search Below
+        </p>
+        <div id="world-map"></div>
+        <form id="country-form">
+            <input type="text" id="country-input" placeholder="Enter country name" required>
+            <button type="submit" id="submit-btn">Analyze</button>
+        </form>
+        <div id="loading">
+            <p>Analyzing global spending data...</p>
+            <svg width="50" height="50" viewBox="0 0 50 50">
+                <circle cx="25" cy="25" r="20" fill="none" stroke="#3498db" stroke-width="5">
+                    <animateTransform attributeName="transform" type="rotate" dur="1s" from="0 25 25" to="360 25 25" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+        <div id="result"></div>
+        <div id="category-analysis">
+            <h2>Spending Category Analysis</h2>
+            <div id="chart-container">
+                <canvas id="category-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+
+    <script>
+        const worldMap = d3.select("#world-map");
+        const width = worldMap.node().getBoundingClientRect().width;
+        const height = 400;
+
+        const svg = worldMap.append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const projection = d3.geoNaturalEarth1()
+            .scale(width / 5.5)
+            .translate([width / 2, height / 1.8]);
+
+        const path = d3.geoPath().projection(projection);
+
+        d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then(function(data) {
+            svg.selectAll("path")
+                .data(data.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .style("fill", "#69b3a2")
+                .style("stroke", "#fff")
+                .style("stroke-width", 0.5);
+        });
+
+        const form = document.getElementById('country-form');
+        const countryInput = document.getElementById('country-input');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const categoryAnalysis = document.getElementById('category-analysis');
+        let categoryChart;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const country = countryInput.value.trim();
+            if (country) {
+                loading.style.display = 'block';
+                result.innerHTML = '';
+                categoryAnalysis.style.display = 'none';
+                analyzeCountry(country);
+            }
+        });
+
+        function analyzeCountry(country) {
+            // Simulating API call and data processing
+            setTimeout(() => {
+                const totalSpending = Math.floor(Math.random() * 10000000000) + 1000000000;
+                const formattedSpending = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalSpending);
+                
+                const categories = [
+                    'E-commerce & Retail',
+                    'Digital Services & Subscriptions',
+                    'Travel & Accommodation',
+                    'Food Delivery & Groceries',
+                    'Entertainment & Gaming',
+                    'Education & E-learning',
+                    'Financial Services',
+                    'Health & Wellness'
+                ];
+                
+                const spendingData = categories.map(category => ({
+                    category,
+                    amount: Math.floor(Math.random() * (totalSpending * 0.3))
+                }));
+
+                spendingData.sort((a, b) => b.amount - a.amount);
+
+                loading.style.display = 'none';
+                result.innerHTML = `
+                    <h2>Online Spending Analysis for ${country}</h2>
+                    <p>Total amount spent online in the last month: ${formattedSpending}</p>
+                    <p>This data is based on a comprehensive analysis of global e-commerce transactions, including major online retailers, digital marketplaces, and local e-commerce platforms.</p>
+                    <h3>Top Spending Categories:</h3>
+                    <ol>
+                        ${spendingData.map(item => `<li>${item.category}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.amount)}</li>`).join('')}
+                    </ol>
+                    <p>Note: This is a simulated result. In a real-world application, this data would be sourced from various financial institutions, payment processors, and e-commerce platforms, ensuring accurate and up-to-date information.</p>
+                `;
+
+                categoryAnalysis.style.display = 'block';
+                updateCategoryChart(spendingData);
+
+                // Add a pin to the map
+                const coordinates = projection.invert(projection(randomPointInCountry(country)));
+                svg.selectAll(".country-pin").remove(); // Remove previous pins
+                svg.append("circle")
+                    .attr("class", "country-pin")
+                    .attr("cx", projection(coordinates)[0])
+                    .attr("cy", projection(coordinates)[1])
+                    .attr("r", 5)
+                    .style("fill", "red")
+                    .style("stroke", "#fff")
+                    .style("stroke-width", 2);
+            }, 2000);
+        }
+
+        function randomPointInCountry(country) {
+            // This is a simplified version. In a real application, you'd use a proper geocoding service.
+            const randomLat = Math.random() * 180 - 90;
+            const randomLon = Math.random() * 360 - 180;
+            return [randomLon, randomLat];
+        }
+
+        function updateCategoryChart(data) {
+            const ctx = document.getElementById('category-chart').getContext('2d');
+            
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => item.category),
+                    datasets: [{
+                        data: data.map(item => item.amount),
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#36A2EB'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Spending Categories Distribution'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body></html>
